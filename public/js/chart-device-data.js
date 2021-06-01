@@ -17,17 +17,36 @@ $(document).ready(() => {
       this.airPressureData = new Array(this.maxLen);
     }
 
-    addData(time, temperature, humidity,airpresure) {
+    addData(time, temperature, humidity) {
       this.timeData.push(time);
       this.temperatureData.push(temperature || null);
-      this.humidityData.push(humidity || null);
-      this.airPressureData.push(airpresure || null);
+      this.humidityData.push(humidity);
       
 
       if (this.timeData.length > this.maxLen) {
         this.timeData.shift();
         this.temperatureData.shift();
         this.humidityData.shift();
+      }
+    }
+  }
+  class DeviceDataAir {
+    constructor(deviceId) {
+      this.deviceId = deviceId;
+      this.maxLen = 50;
+      this.timeData = new Array(this.maxLen);
+      this.temperatureData = new Array(this.maxLen);
+      this.humidityData = new Array(this.maxLen);
+      this.airPressureData = new Array(this.maxLen);
+    }
+
+    addDataAir(time,airpresure) {
+      this.timeData.push(time);
+      this.airPressureData.push(airpresure);
+      
+
+      if (this.timeData.length > this.maxLen) {
+        this.timeData.shift();
         this.airpresure.shift();
       }
     }
@@ -196,13 +215,13 @@ $(document).ready(() => {
      if(messageData.IotData.airPresure){
       if (existingDeviceData) {
         const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
-        existingDeviceData.addData(messageData.MessageDate,null,null ,messageData.IotData.airPresure);
+        existingDeviceData.addDataAir(messageData.MessageDate,messageData.IotData.airPresure);
       } else {
-        const newDeviceData = new DeviceData(messageData.DeviceId);
+        const newDeviceData = new DeviceDataAir(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
         const numDevices = trackedDevices.getDevicesCount();
         deviceCount.innerText = numDevices === 1 ? `${numDevices} device` : `${numDevices} devices`;
-        newDeviceData.addData(messageData.MessageDate,null,null, messageData.IotData.airPresure);
+        newDeviceData.addDataAir(messageData.MessageDate ,messageData.IotData.airPresure);
 
         // add device to the UI list
         const node = document.createElement('option');
@@ -219,13 +238,13 @@ $(document).ready(() => {
      
 
       if (existingDeviceData) {
-        existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity,null);
+        existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
       } else {
         const newDeviceData = new DeviceData(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
         const numDevices = trackedDevices.getDevicesCount();
         deviceCount.innerText = numDevices === 1 ? `${numDevices} device` : `${numDevices} devices`;
-        newDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity,null);
+        newDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
 
         // add device to the UI list
         const node = document.createElement('option');
