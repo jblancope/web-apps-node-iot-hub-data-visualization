@@ -219,26 +219,28 @@ $(document).ready(() => {
       if (!messageData.MessageDate || (!messageData.IotData.temperature && !messageData.IotData.humidity && !messageData.IotData.airPresure)) {
         return;
       }
-     if(messageData.IotData.airPresure&&mode){
+     if(messageData.IotData.airPresure){
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
       if (existingDeviceData) {
-        
+        if(mode){
         existingDeviceData.addDataAir(messageData.MessageDate,messageData.IotData.airPresure);
         myLineChart.update();
+        }
       } else {
         const newDeviceData = new DeviceDataAir(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
         const numDevices = trackedDevices.getDevicesCount();
         deviceCount.innerText = numDevices === 1 ? `${numDevices} device` : `${numDevices} devices`;
-        newDeviceData.addDataAir(messageData.MessageDate ,messageData.IotData.airPresure);
-
-        // add device to the UI list
         const node = document.createElement('option');
         const nodeText = document.createTextNode(messageData.DeviceId);
         node.appendChild(nodeText);
         listOfDevices.appendChild(node);
+        if(mode){
+        newDeviceData.addDataAir(messageData.MessageDate ,messageData.IotData.airPresure);
+        
+        // add device to the UI list
         myLineChart.update();
-
+        }
         // if this is the first device being discovered, auto-select it
         
       }
