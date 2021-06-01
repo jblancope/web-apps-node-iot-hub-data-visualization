@@ -169,6 +169,7 @@ $(document).ready(() => {
   // based on selection
 
   const deviceCount = document.getElementById('deviceCount');
+  let needsAutoSelect = true;
   const listOfDevices = document.getElementById('listOfDevices');
   function OnSelectionChange() {
     const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
@@ -217,6 +218,7 @@ $(document).ready(() => {
       if (existingDeviceData) {
         
         existingDeviceData.addDataAir(messageData.MessageDate,messageData.IotData.airPresure);
+        myLineChart.update();
       } else {
         const newDeviceData = new DeviceDataAir(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
@@ -229,6 +231,7 @@ $(document).ready(() => {
         const nodeText = document.createTextNode(messageData.DeviceId);
         node.appendChild(nodeText);
         listOfDevices.appendChild(node);
+        myLineChart.update();
 
         // if this is the first device being discovered, auto-select it
         
@@ -240,6 +243,7 @@ $(document).ready(() => {
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
       if (existingDeviceData) {
         existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
+        myLineChart.update();
       } else {
         const newDeviceData = new DeviceData(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
@@ -252,12 +256,17 @@ $(document).ready(() => {
         const nodeText = document.createTextNode(messageData.DeviceId);
         node.appendChild(nodeText);
         listOfDevices.appendChild(node);
-
+        
         
       }
     }
-
-      myLineChart.update();
+    if (needsAutoSelect) {
+      needsAutoSelect = false;
+      listOfDevices.selectedIndex = 0;
+      OnSelectionChange();
+    }
+    myLineChart.update();
+      
     } catch (err) {
       console.error(err);
     }
