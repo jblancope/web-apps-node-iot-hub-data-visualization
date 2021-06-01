@@ -14,17 +14,21 @@ $(document).ready(() => {
       this.timeData = new Array(this.maxLen);
       this.temperatureData = new Array(this.maxLen);
       this.humidityData = new Array(this.maxLen);
+      this.airPressureData = new Array(this.maxLen);
     }
 
-    addData(time, temperature, humidity) {
+    addData(time, temperature, humidity,airpresure) {
       this.timeData.push(time);
-      this.temperatureData.push(temperature);
+      this.temperatureData.push(temperature || null);
       this.humidityData.push(humidity || null);
+      this.airPressureData.push(airpresure || null);
+      
 
       if (this.timeData.length > this.maxLen) {
         this.timeData.shift();
         this.temperatureData.shift();
         this.humidityData.shift();
+        this.airpresure.shift();
       }
     }
   }
@@ -80,6 +84,21 @@ $(document).ready(() => {
       }
     ]
   };
+  const chartDataAir = {
+    datasets: [
+      {
+        fill: false,
+        label: 'AirPressure',
+        yAxisID: 'AirPressure',
+        borderColor: 'rgba(255, 204, 0, 1)',
+        pointBoarderColor: 'rgba(255, 204, 0, 1)',
+        backgroundColor: 'rgba(255, 204, 0, 0.4)',
+        pointHoverBackgroundColor: 'rgba(255, 204, 0, 1)',
+        pointHoverBorderColor: 'rgba(255, 204, 0, 1)',
+        spanGaps: true,
+      }
+    ]
+  };
 
   const chartOptions = {
     scales: {
@@ -103,6 +122,19 @@ $(document).ready(() => {
       }]
     }
   };
+  const chartOptionsAir = {
+    scales: {
+      yAxes: [{
+        id: 'AirPressure',
+        type: 'linear',
+        scaleLabel: {
+          labelString: 'AirPressure %',
+          display: true,
+        },
+        position: 'left',
+      }]
+    }
+  };
 
   // Get the context of the canvas element we want to select
   const ctx = document.getElementById('iotChart').getContext('2d');
@@ -116,14 +148,32 @@ $(document).ready(() => {
 
   // Manage a list of devices in the UI, and update which device data the chart is showing
   // based on selection
-  let needsAutoSelect = true;
+
   const deviceCount = document.getElementById('deviceCount');
   const listOfDevices = document.getElementById('listOfDevices');
   function OnSelectionChange() {
     const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
     chartData.labels = device.timeData;
+    if(device.temperatureData==null){
+      const myLineChart = new Chart(
+        ctx,
+        {
+          type: 'line',
+          data: chartDataAir,
+          options: chartOptionsAir,
+        });
+        chartData.datasets[0].data = device.airPressureData;
+    }else{
+      const myLineChart = new Chart(
+        ctx,
+        {
+          type: 'line',
+          data: chartData,
+          options: chartOptions,
+        });
     chartData.datasets[0].data = device.temperatureData;
     chartData.datasets[1].data = device.humidityData;
+    }
     myLineChart.update();
   }
   listOfDevices.addEventListener('change', OnSelectionChange, false);
@@ -140,21 +190,19 @@ $(document).ready(() => {
       console.log(messageData);
 
       // time and either temperature or humidity are required
-      if (!messageData.MessageDate || (!messageData.IotData.temperature && !messageData.IotData.humidity)) {
+      if (!messageData.MessageDate || (!messageData.IotData.temperature && !messageData.IotData.humidity && !messageData.IotData.airPresure)) {
         return;
       }
-
-      // find or add device to list of tracked devices
-      const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
-
+     if(messageData.IotData.airPresure){
       if (existingDeviceData) {
-        existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
+        const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
+        existingDeviceData.addData(messageData.MessageDate,null,null ,messageData.IotData.airPresure);
       } else {
         const newDeviceData = new DeviceData(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
         const numDevices = trackedDevices.getDevicesCount();
         deviceCount.innerText = numDevices === 1 ? `${numDevices} device` : `${numDevices} devices`;
-        newDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
+        newDeviceData.addData(messageData.MessageDate,null,null, messageData.IotData.airPresure);
 
         // add device to the UI list
         const node = document.createElement('option');
@@ -163,12 +211,31 @@ $(document).ready(() => {
         listOfDevices.appendChild(node);
 
         // if this is the first device being discovered, auto-select it
-        if (needsAutoSelect) {
-          needsAutoSelect = false;
-          listOfDevices.selectedIndex = 0;
-          OnSelectionChange();
-        }
+        
       }
+     }else{
+
+      // find or add device to list of tracked devices
+     
+
+      if (existingDeviceData) {
+        existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity,null);
+      } else {
+        const newDeviceData = new DeviceData(messageData.DeviceId);
+        trackedDevices.devices.push(newDeviceData);
+        const numDevices = trackedDevices.getDevicesCount();
+        deviceCount.innerText = numDevices === 1 ? `${numDevices} device` : `${numDevices} devices`;
+        newDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity,null);
+
+        // add device to the UI list
+        const node = document.createElement('option');
+        const nodeText = document.createTextNode(messageData.DeviceId);
+        node.appendChild(nodeText);
+        listOfDevices.appendChild(node);
+
+        
+      }
+    }
 
       myLineChart.update();
     } catch (err) {
