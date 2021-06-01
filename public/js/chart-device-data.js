@@ -178,7 +178,7 @@ $(document).ready(() => {
     chartData.labels = device.timeData;
     if(device.deviceId=="airPreasure2"){
       mode=true;
-      chartDataAir.datasets.data = device.airPressureData;
+      chartDataAir.datasets[0].data = device.airPressureData;
       const myLineChart = new Chart(
         ctx,
         {
@@ -222,10 +222,10 @@ $(document).ready(() => {
      if(messageData.IotData.airPresure){
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
       if (existingDeviceData) {
-        if(mode){
+       
         existingDeviceData.addDataAir(messageData.MessageDate,messageData.IotData.airPresure);
         myLineChart.update();
-        }
+       
       } else {
         const newDeviceData = new DeviceDataAir(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
@@ -235,23 +235,23 @@ $(document).ready(() => {
         const nodeText = document.createTextNode(messageData.DeviceId);
         node.appendChild(nodeText);
         listOfDevices.appendChild(node);
-        if(mode){
+       
         newDeviceData.addDataAir(messageData.MessageDate ,messageData.IotData.airPresure);
         
         // add device to the UI list
         myLineChart.update();
-        }
+       
         // if this is the first device being discovered, auto-select it
         
       }
      }else{
 
       // find or add device to list of tracked devices
-     if(!mode&&messageData.IotData.temperature){
+     if(messageData.IotData.temperature){
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
       if (existingDeviceData) {
         existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
-        myLineChart.update();
+      
       } else {
         const newDeviceData = new DeviceData(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
@@ -264,7 +264,7 @@ $(document).ready(() => {
         const nodeText = document.createTextNode(messageData.DeviceId);
         node.appendChild(nodeText);
         listOfDevices.appendChild(node);
-        myLineChart.update();
+       
       }
       }
     }
@@ -272,8 +272,9 @@ $(document).ready(() => {
       needsAutoSelect = false;
       listOfDevices.selectedIndex = 0;
       OnSelectionChange();
-      myLineChart.update();
+     
     }
+    myLineChart.update();
     
       
     } catch (err) {
