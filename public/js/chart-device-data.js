@@ -171,11 +171,13 @@ $(document).ready(() => {
 
   const deviceCount = document.getElementById('deviceCount');
   let needsAutoSelect = true;
+  let mode = false;
   const listOfDevices = document.getElementById('listOfDevices');
   function OnSelectionChange() {
     const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
     chartData.labels = device.timeData;
     if(device.deviceId=="airPreasure2"){
+      mode=true;
       chartDataAir.datasets.data = device.airPressureData;
       const myLineChart = new Chart(
         ctx,
@@ -186,6 +188,7 @@ $(document).ready(() => {
         });
         
     }else{
+      mode=false
       chartData.datasets[0].data = device.temperatureData;
       chartData.datasets[1].data = device.humidityData;
       const myLineChart = new Chart(
@@ -216,7 +219,7 @@ $(document).ready(() => {
       if (!messageData.MessageDate || (!messageData.IotData.temperature && !messageData.IotData.humidity && !messageData.IotData.airPresure)) {
         return;
       }
-     if(messageData.IotData.airPresure){
+     if(messageData.IotData.airPresure&&mode){
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
       if (existingDeviceData) {
         
@@ -242,7 +245,7 @@ $(document).ready(() => {
      }else{
 
       // find or add device to list of tracked devices
-     
+     if(!mode){
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
       if (existingDeviceData) {
         existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
@@ -259,16 +262,17 @@ $(document).ready(() => {
         const nodeText = document.createTextNode(messageData.DeviceId);
         node.appendChild(nodeText);
         listOfDevices.appendChild(node);
-        
-        
+        myLineChart.update();
+      }
       }
     }
     if (needsAutoSelect) {
       needsAutoSelect = false;
       listOfDevices.selectedIndex = 0;
       OnSelectionChange();
+      myLineChart.update();
     }
-    myLineChart.update();
+    
       
     } catch (err) {
       console.error(err);
