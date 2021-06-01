@@ -104,7 +104,7 @@ $(document).ready(() => {
     ]
   };
   const chartDataAir = {
-    datasets: 
+    datasets: [
       {
         fill: false,
         label: 'AirPressure',
@@ -116,6 +116,7 @@ $(document).ready(() => {
         pointHoverBorderColor: 'rgba(255, 204, 0, 1)',
         spanGaps: true,
       }
+    ]
     
   };
 
@@ -143,7 +144,7 @@ $(document).ready(() => {
   };
   const chartOptionsAir = {
     scales: {
-      yAxes: {
+      yAxes: [{
         id: 'AirPressure',
         type: 'linear',
         scaleLabel: {
@@ -151,7 +152,7 @@ $(document).ready(() => {
           display: true,
         },
         position: 'left',
-      }
+      }]
     }
   };
 
@@ -174,7 +175,7 @@ $(document).ready(() => {
   function OnSelectionChange() {
     const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
     chartData.labels = device.timeData;
-    if(device.temperatureData==null){
+    if(device.deviceId=="airPreasure2"){
       chartDataAir.datasets.data = device.airPressureData;
       const myLineChart = new Chart(
         ctx,
