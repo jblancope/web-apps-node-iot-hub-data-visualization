@@ -47,7 +47,7 @@ $(document).ready(() => {
 
       if (this.timeData.length > this.maxLen) {
         this.timeData.shift();
-        this.airpresure.shift();
+        this.airPressureData.shift();
       }
     }
   }
