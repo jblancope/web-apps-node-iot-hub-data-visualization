@@ -175,29 +175,22 @@ $(document).ready(() => {
   const listOfDevices = document.getElementById('listOfDevices');
   function OnSelectionChange() {
     const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
-    chartData.labels = device.timeData;
+    
     if(device.deviceId=="airPreasure2"){
       mode=true;
+      myLineChart.data= chartDataAir;
+      myLineChart.options=chartOptionsAir;
+      chartDataAir.labels = device.timeData;
       chartDataAir.datasets[0].data = device.airPressureData;
-      const myLineChart = new Chart(
-        ctx,
-        {
-          type: 'line',
-          data: chartDataAir,
-          options: chartOptionsAir,
-        });
         
     }else{
       mode=false
+      myLineChart.data= chartData;
+      myLineChart.options=chartOptions;
+      chartData.labels = device.timeData;
       chartData.datasets[0].data = device.temperatureData;
       chartData.datasets[1].data = device.humidityData;
-      const myLineChart = new Chart(
-        ctx,
-        {
-          type: 'line',
-          data: chartData,
-          options: chartOptions,
-        });
+     
   
     }
     myLineChart.update();
