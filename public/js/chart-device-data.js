@@ -213,8 +213,9 @@ $(document).ready(() => {
         return;
       }
      if(messageData.IotData.airPresure){
+      const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
       if (existingDeviceData) {
-        const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
+        
         existingDeviceData.addDataAir(messageData.MessageDate,messageData.IotData.airPresure);
       } else {
         const newDeviceData = new DeviceDataAir(messageData.DeviceId);
