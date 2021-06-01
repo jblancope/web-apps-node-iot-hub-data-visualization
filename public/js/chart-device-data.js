@@ -104,7 +104,7 @@ $(document).ready(() => {
     ]
   };
   const chartDataAir = {
-    datasets: [
+    datasets: 
       {
         fill: false,
         label: 'AirPressure',
@@ -116,7 +116,7 @@ $(document).ready(() => {
         pointHoverBorderColor: 'rgba(255, 204, 0, 1)',
         spanGaps: true,
       }
-    ]
+    
   };
 
   const chartOptions = {
@@ -143,7 +143,7 @@ $(document).ready(() => {
   };
   const chartOptionsAir = {
     scales: {
-      yAxes: [{
+      yAxes: {
         id: 'AirPressure',
         type: 'linear',
         scaleLabel: {
@@ -151,7 +151,7 @@ $(document).ready(() => {
           display: true,
         },
         position: 'left',
-      }]
+      }
     }
   };
 
@@ -175,6 +175,7 @@ $(document).ready(() => {
     const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
     chartData.labels = device.timeData;
     if(device.temperatureData==null){
+      chartDataAir.datasets.data = device.airPressureData;
       const myLineChart = new Chart(
         ctx,
         {
@@ -182,8 +183,10 @@ $(document).ready(() => {
           data: chartDataAir,
           options: chartOptionsAir,
         });
-        chartData.datasets[0].data = device.airPressureData;
+        
     }else{
+      chartData.datasets[0].data = device.temperatureData;
+      chartData.datasets[1].data = device.humidityData;
       const myLineChart = new Chart(
         ctx,
         {
@@ -191,8 +194,7 @@ $(document).ready(() => {
           data: chartData,
           options: chartOptions,
         });
-    chartData.datasets[0].data = device.temperatureData;
-    chartData.datasets[1].data = device.humidityData;
+  
     }
     myLineChart.update();
   }
