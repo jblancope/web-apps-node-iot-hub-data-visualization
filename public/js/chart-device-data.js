@@ -245,7 +245,7 @@ $(document).ready(() => {
      }else{
 
       // find or add device to list of tracked devices
-     if(!mode){
+     if(!mode&&messageData.IotData.temperature){
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
       if (existingDeviceData) {
         existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
